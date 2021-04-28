@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Button, Navbar, Nav, NavDropdown, FormControl, NavItem } from 'react-bootstrap';
+import { Form, Button, Navbar, Nav, NavDropdown, FormControl, NavItem, Modal  } from 'react-bootstrap';
 import {
     BrowserRouter as Router,
     Switch,
@@ -10,11 +10,129 @@ import './css/mdb.min.css';
 import './css/admin.css';
 import './css/scroll.css';
 import '../../bootstrap/css/bootstrap.min.css';
+import BlogService from '../../services/BlogService';
 
-import Header from '../Header/Header';
+import Select from 'react-select';
 
 
 class AdminBlog extends Component {
+    
+    constructor(props){
+        super(props);
+        this.state = {
+            id: 0,
+            city: "",
+            selectedOption: null,
+            postTitle: "",
+            postContent: "",
+            postPreContent: "",
+            postAuthor: "",
+            postImageUrl: "",
+            postViews: 1,
+            postEnabled: true,
+            postCommentEnabled: true,
+            updateName: "",
+            showHide : false,
+            editShowHide: false,
+            categories: [],
+            posts: [],
+            options: [],
+            categoryEntity: {},
+            postEntity: {},
+            categorySelectEditName: ""
+        }
+
+        this.handleTitleChange = this.handleTitleChange.bind(this);
+        this.handleContentChange = this.handleContentChange.bind(this);
+        this.handleContentChange = this.handleContentChange.bind(this);
+        this.handlePreContentChange = this.handlePreContentChange.bind(this);
+        this.handleAuthorChange = this.handleAuthorChange.bind(this);
+        this.handleImageUrlChange = this.handleImageUrlChange.bind(this);
+        // this.handleUpdateViewsChange = this.handleUpdateViewsChange.bind(this);
+        this.handleUpdateNameChange = this.handleUpdateNameChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleUpdateSubmit = this.handleUpdateSubmit.bind(this);
+    }
+
+    componentDidMount(){
+        BlogService.getPosts().then((res) => {
+            this.setState({ posts: res.data});
+        });
+        
+        BlogService.getBlogCategories().then((res) => {
+            this.setState({ categories: res.data});
+
+            const options = this.state.categories.map(d => ({
+                "value" : d.id,
+                "label" : d.name
+              }));
+              this.setState({ options: options});
+        });
+    }
+
+    handleTitleChange = event =>{
+        this.setState({postTitle: event.target.value});
+    }
+    handleContentChange = event =>{
+        this.setState({postContent: event.target.value});
+    }
+    handlePreContentChange = event =>{
+        this.setState({postPreContent: event.target.value});
+    }
+    handleAuthorChange = event =>{
+        this.setState({postAuthor: event.target.value});
+    }
+    handleImageUrlChange = event =>{
+        this.setState({postImageUrl: event.target.value});
+    }
+    
+    handleUpdateNameChange = event =>{
+        this.setState({updateName: event.target.value});
+    }
+
+    handleModalShowHide() {
+        this.setState({ showHide: !this.state.showHide })
+    }
+
+    handleEditModalShow(id) {
+        BlogService.getPostById(id).then( res => {
+            this.setState({postEntity: res.data});
+            this.setState({updateName: this.state.postEntity.title });
+            this.setState({categorySelectEditName: this.state.postEntity.category.name});
+        });
+        this.setState({ editShowHide: !this.state.editShowHide })
+    }
+    handleEditModalHide() {
+        this.setState({ editShowHide: !this.state.editShowHide })
+    }
+
+    handleChange(e){
+        BlogService.getBlogCategoryById(e.value).then( res => {
+            this.setState({categoryEntity: res.data});
+        });
+        this.setState({ id: e.value, city: e.label})
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+        let postBody = {title: this.state.postTitle, city: this.state.cityEntity};
+
+        console.log('city => ' + JSON.stringify(postBody));
+
+        BlogService.createPost(postBody).then(res =>{
+            window.location.replace("/admin/blog");
+        });
+    }
+
+    handleUpdateSubmit = (e) => {
+        e.preventDefault();
+        let postBody = {title: this.state.updateName, city: this.state.cityEntity};
+        // console.log('city => ' + JSON.stringify(cityBody));
+
+        BlogService.updatePost(postBody, this.state.postEntity.id).then(res =>{
+            window.location.replace("/admin/blog");
+        });
+    }
 
     render() {
         return (
@@ -74,27 +192,6 @@ class AdminBlog extends Component {
 
     
                             <ul class="navbar-nav ms-auto d-flex flex-row">
-                            {/* <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Dropdown
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">Something else here</a>
-                                </div>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link me-3 me-lg-0" href="#"></a>
-                            </li>
-                            
-                            <li class="nav-item me-3 me-lg-0">
-                                <a class="nav-link" href="#">
-                                <i class="fab fa-github"></i>
-                                </a>
-                            </li> */}
 
                             <NavDropdown
                                 title={
@@ -112,60 +209,6 @@ class AdminBlog extends Component {
                                 <NavDropdown.Item href="#action/3.4">Logout</NavDropdown.Item>
                             </NavDropdown>
 
-                            
-                            {/* <li class="nav-item dropdown">
-                                <a class="nav-link me-3 me-lg-0 dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                data-mdb-toggle="dropdown" aria-expanded="false">
-                                <i class="united kingdom flag m-0"></i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="united kingdom flag"></i>English
-                                    <i class="fa fa-check text-success ms-2"></i></a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider" />
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="poland flag"></i>Polski</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="china flag"></i>中文</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="japan flag"></i>日本語</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="germany flag"></i>Deutsch</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="france flag"></i>Français</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="spain flag"></i>Español</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="russia flag"></i>Русский</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#"><i class="portugal flag"></i>Português</a>
-                                </li>
-                                </ul>
-                            </li>
-
-                            
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle hidden-arrow d-flex align-items-center" href="#"
-                                id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
-                                <img src="https://mdbootstrap.com/img/Photos/Avatars/img (31).jpg" class="rounded-circle" height="22"
-                                    alt="" loading="lazy" />
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                                <li><a class="dropdown-item" href="#">My profile</a></li>
-                                <li><a class="dropdown-item" href="#">Settings</a></li>
-                                <li><a class="dropdown-item" href="#">Logout</a></li>
-                                </ul>
-                            </li> */}
                             </ul>
                         </div>
                         
@@ -187,7 +230,9 @@ class AdminBlog extends Component {
                                         <h3><i class="far fa-file-alt"></i> Blog posts</h3>
                                         </div>
                                         <div className="col ml-auto">
-                                        <a href="#" class="btn btn-primary btn-sm"><i class="fas fa-plus" aria-hidden="true"></i> Add new post</a>
+                                        <Button variant="primary" onClick={() => this.handleModalShowHide()}>
+                                            Add new post
+                                        </Button>
                                         </div>
                                         
                                     </div>
@@ -316,6 +361,53 @@ class AdminBlog extends Component {
 
 
                                 </div>
+                                <Modal show={this.state.showHide}>
+                                <Modal.Header closeButton onClick={() => this.handleModalShowHide()}>
+                                <Modal.Title>Add category</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <form>
+                                        <div className = "form-group">
+                                            <label>
+                                                Name : 
+                                            </label>
+                                            <input type = "text" className = "form-control" value = {this.name} onChange = {this.handleTitleChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <button className = "btn btn-success" onClick={this.handleSubmit}>Add category</button>
+                                        </div>
+                                    </form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                <Button variant="secondary" onClick={() => this.handleModalShowHide()}>
+                                    Close
+                                </Button>
+                                </Modal.Footer>
+                            </Modal>
+
+                            <Modal show={this.state.editShowHide}>
+                                <Modal.Header closeButton onClick={() => this.handleEditModalHide()}>
+                                <Modal.Title>Edit category</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <form>
+                                        <div className = "form-group">
+                                            <label>
+                                                Name : 
+                                            </label>
+                                            <input type = "text" className = "form-control" value = { this.state.updateName } onChange = {this.handleUpdateNameChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <button className = "btn btn-success" onClick={this.handleUpdateSubmit}>Edit category</button>
+                                        </div>
+                                    </form>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                <Button variant="secondary" onClick={() => this.handleEditModalHide()}>
+                                    Close
+                                </Button>
+                                </Modal.Footer>
+                            </Modal>
 
                             </div>
 

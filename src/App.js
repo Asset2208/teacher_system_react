@@ -17,6 +17,7 @@ import Blog from './components/BlogPage/Blog';
 import Login from './components/LoginPage/Login';
 import Admin from './components/AdminPage/Admin';
 import AdminBlog from './components/AdminPage/AdminBlog';
+import AdminBlogCategory from './components/AdminPage/AdminBlogCategory';
 import AdminUsers from './components/AdminPage/AdminUsers';
 import AdminCities from './components/AdminPage/AdminCities';
 import AdminDistricts from './components/AdminPage/AdminDistricts';
@@ -36,6 +37,7 @@ class App extends Component {
           <Route exact path={'/blog'} component={Blog}/>
           <Route exact path={'/admin'} component={Admin}/>
           <Route exact path={'/admin/blog'} component={AdminBlog}/>
+          <Route exact path={'/admin/blog/category'} component={AdminBlogCategory}/>
           <Route exact path={'/admin/users'} component={AdminUsers}/>
           <Route exact path={'/admin/cities'} component={AdminCities}/>
           <Route exact path={'/admin/districts'} component={AdminDistricts}/>
