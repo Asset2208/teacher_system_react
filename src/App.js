@@ -21,6 +21,9 @@ import AdminBlogCategory from './components/AdminPage/AdminBlogCategory';
 import AdminUsers from './components/AdminPage/AdminUsers';
 import AdminCities from './components/AdminPage/AdminCities';
 import AdminDistricts from './components/AdminPage/AdminDistricts';
+import SystemFeedbackCategory from './components/AdminPage/SystemFeedbackCategory';
+import SystemFeedback from './components/AdminPage/SystemFeedback';
+import SystemUserFeedback from './components/SystemFeedback/SystemUserFeedback';
 import Footer from './components/Footer/Footer';
 import Header from './components/Header/Header';
 import Registration from './components/RegisterPage/Registration';
@@ -33,14 +36,17 @@ class App extends Component {
         
         <Switch>
           <Route exact path={'/'} component={Home}/>
-          <Route exact path={'/post'} component={Post}/>
+          <Route exact path={'/post/:id'} component={Post}/>
           <Route exact path={'/blog'} component={Blog}/>
+          <Route exact path={'/feedback'} component={SystemUserFeedback}/>
           <Route exact path={'/admin'} component={Admin}/>
           <Route exact path={'/admin/blog'} component={AdminBlog}/>
           <Route exact path={'/admin/blog/category'} component={AdminBlogCategory}/>
           <Route exact path={'/admin/users'} component={AdminUsers}/>
           <Route exact path={'/admin/cities'} component={AdminCities}/>
           <Route exact path={'/admin/districts'} component={AdminDistricts}/>
+          <Route exact path={'/admin/s-feedback-category'} component={SystemFeedbackCategory}/>
+          <Route exact path={'/admin/s-feedback'} component={SystemFeedback}/>
           <Route exact path={'/login'} component={Login}/>
           <Route exact path={'/register'} component={Registration}/>
           <Route exact path={'/profile'} component={Profile} />

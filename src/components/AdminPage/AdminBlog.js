@@ -31,7 +31,13 @@ class AdminBlog extends Component {
             postViews: 1,
             postEnabled: true,
             postCommentEnabled: true,
-            updateName: "",
+            updateTitle: "",
+            updateContent: "",
+            updatePreContent: "",
+            updateAuthor: "",
+            updateImageUrl: "",
+            updateEnabled: true,
+            updateCommentEnabled: true,
             showHide : false,
             editShowHide: false,
             categories: [],
@@ -49,9 +55,15 @@ class AdminBlog extends Component {
         this.handleAuthorChange = this.handleAuthorChange.bind(this);
         this.handleImageUrlChange = this.handleImageUrlChange.bind(this);
         // this.handleUpdateViewsChange = this.handleUpdateViewsChange.bind(this);
-        this.handleUpdateNameChange = this.handleUpdateNameChange.bind(this);
+        this.handleUpdateTitleChange = this.handleUpdateTitleChange.bind(this);
+        this.handleUpdateContentChange = this.handleUpdateContentChange.bind(this);
+        this.handleUpdatePreContentChange = this.handleUpdatePreContentChange.bind(this);
+        this.handleUpdateAuthorChange = this.handleUpdateAuthorChange.bind(this);
+        this.handleUpdateImageUrlChange = this.handleUpdateImageUrlChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleUpdateSubmit = this.handleUpdateSubmit.bind(this);
+        this.editEnabled = this.editEnabled.bind(this);
+        this.editCommentEnabled = this.editCommentEnabled.bind(this);
     }
 
     componentDidMount(){
@@ -70,6 +82,14 @@ class AdminBlog extends Component {
         });
     }
 
+    editEnabled() {
+        this.setState({updateEnabled: !this.state.updateEnabled})
+    }
+
+    editCommentEnabled() {
+        this.setState({updateCommentEnabled: !this.state.updateCommentEnabled})
+    }
+
     handleTitleChange = event =>{
         this.setState({postTitle: event.target.value});
     }
@@ -86,8 +106,20 @@ class AdminBlog extends Component {
         this.setState({postImageUrl: event.target.value});
     }
     
-    handleUpdateNameChange = event =>{
-        this.setState({updateName: event.target.value});
+    handleUpdateTitleChange = event =>{
+        this.setState({updateTitle: event.target.value});
+    }
+    handleUpdateContentChange = event =>{
+        this.setState({updateContent: event.target.value});
+    }
+    handleUpdatePreContentChange = event =>{
+        this.setState({updatePreContent: event.target.value});
+    }
+    handleUpdateAuthorChange = event =>{
+        this.setState({updateAuthor: event.target.value});
+    }
+    handleUpdateImageUrlChange = event =>{
+        this.setState({updateImageUrl: event.target.value});
     }
 
     handleModalShowHide() {
@@ -97,7 +129,13 @@ class AdminBlog extends Component {
     handleEditModalShow(id) {
         BlogService.getPostById(id).then( res => {
             this.setState({postEntity: res.data});
-            this.setState({updateName: this.state.postEntity.title });
+            this.setState({updateTitle: this.state.postEntity.title,
+            updateContent: this.state.postEntity.content,
+            updatePreContent: this.state.postEntity.preContent,
+            updateAuthor: this.state.postEntity.author,
+            updateImageUrl: this.state.postEntity.imageUrl,
+            updateEnabled: this.state.postEntity.enabled,
+            updateCommentEnabled: this.state.postEntity.comments_enabled});
             this.setState({categorySelectEditName: this.state.postEntity.category.name});
         });
         this.setState({ editShowHide: !this.state.editShowHide })
@@ -115,9 +153,17 @@ class AdminBlog extends Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        let postBody = {title: this.state.postTitle, city: this.state.cityEntity};
+        let postBody = {title: this.state.postTitle, 
+            content: this.state.postContent, 
+            preContent: this.state.postPreContent,
+            author: this.state.postAuthor,
+            imageUrl: this.state.postImageUrl,
+            views: 1,
+            enabled: this.state.postEnabled,
+            comments_enabled: this.state.postCommentEnabled,
+            category: this.state.categoryEntity};
 
-        console.log('city => ' + JSON.stringify(postBody));
+        // console.log('city => ' + JSON.stringify(postBody));
 
         BlogService.createPost(postBody).then(res =>{
             window.location.replace("/admin/blog");
@@ -126,7 +172,14 @@ class AdminBlog extends Component {
 
     handleUpdateSubmit = (e) => {
         e.preventDefault();
-        let postBody = {title: this.state.updateName, city: this.state.cityEntity};
+        let postBody = {title: this.state.updateTitle, 
+            content: this.state.updateContent, 
+            preContent: this.state.updatePreContent,
+            author: this.state.updateAuthor,
+            imageUrl: this.state.updateImageUrl,
+            enabled: this.state.updateEnabled,
+            comments_enabled: this.state.updateCommentEnabled,
+            category: this.state.categoryEntity};
         // console.log('city => ' + JSON.stringify(cityBody));
 
         BlogService.updatePost(postBody, this.state.postEntity.id).then(res =>{
@@ -251,110 +304,31 @@ class AdminBlog extends Component {
                                                 </tr>
                                             </thead>
                                             <tbody>
-
+                                            {this.state.posts.map(post=>(
                                                 <tr>
                                                     <td>
                                                         <div className="row">
                                                             <div className="col">
-                                                                <div class="blog_list"><img class="img-fluid d-none d-lg-block" alt="image" src="https://via.placeholder.com/180x120" style={{height: "150px"}} /></div>
+                                                                <div class="blog_list"><img class="img-fluid d-none d-lg-block" alt="image" src={post.imageUrl} style={{height: "150px"}} /></div>
                                                             </div>
                                                             <div className="col-8">
-                                                                <h4> Vivamus condimentum rutrum odio</h4>
-                                                                <p>Posted by <b>Administrator</b> at Nov 29 2018</p>
-                                                                <p>Nulla cursus maximus lacus at efficitur. In lobortis ante vitae nulla semper, in volutpat libero aliquet. Morbi sit amet nibh vitae metus interdum finibus sed nec nisl. Ut quam dolor, bibendum id maximus ut, suscipit consectetur sem.</p>
+                                                                <h4> {post.title}</h4>
+                                                                <p>Posted by <b>{post.author}</b> at {post.createdAt}</p>
+                                                                <p>{post.preContent}</p>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td>Blog</td>
+                                                    <td>{post.category.name}</td>
                                                     <td>
-                                                        <a href="#" class="btn btn-primary btn-sm btn-block"><i class="far fa-edit"></i> Edit</a>                                                        
+                                                        <Button className="btn btn-primary btn-sm" onClick={() => this.handleEditModalShow(post.id)}>
+                                                            <i class="far fa-edit"></i> Edit 
+                                                        </Button>                                                      
                                                         <a href="#" class="btn btn-danger btn-sm btn-block mt-2"><i class="fas fa-trash"></i> Delete</a>                                                        
                                                     </td>
                                                 </tr>
-                                                <tr>
-                                                    <td>
-                                                        <div className="row">
-                                                            <div className="col">
-                                                                <div class="blog_list"><img class="img-fluid d-none d-lg-block" alt="image" src="https://via.placeholder.com/180x120" style={{height: "150px"}} /></div>
-                                                            </div>
-                                                            <div className="col-8">
-                                                                <h4> Vivamus condimentum rutrum odio</h4>
-                                                                <p>Posted by <b>Administrator</b> at Nov 29 2018</p>
-                                                                <p>Nulla cursus maximus lacus at efficitur. In lobortis ante vitae nulla semper, in volutpat libero aliquet. Morbi sit amet nibh vitae metus interdum finibus sed nec nisl. Ut quam dolor, bibendum id maximus ut, suscipit consectetur sem.</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <td>Blog</td>
-
-                                                    <td>
-                                                        <a href="#" class="btn btn-primary btn-sm btn-block"><i class="far fa-edit"></i> Edit</a>                                                        
-                                                        <a href="#" class="btn btn-danger btn-sm btn-block mt-2"><i class="fas fa-trash"></i> Delete</a>                                                        
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <div className="row">
-                                                            <div className="col">
-                                                                <div class="blog_list"><img class="img-fluid d-none d-lg-block" alt="image" src="https://via.placeholder.com/180x120" style={{height: "150px"}} /></div>
-                                                            </div>
-                                                            <div className="col-8">
-                                                                <h4> Vivamus condimentum rutrum odio</h4>
-                                                                <p>Posted by <b>Administrator</b> at Nov 29 2018</p>
-                                                                <p>Nulla cursus maximus lacus at efficitur. In lobortis ante vitae nulla semper, in volutpat libero aliquet. Morbi sit amet nibh vitae metus interdum finibus sed nec nisl. Ut quam dolor, bibendum id maximus ut, suscipit consectetur sem.</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <td>News</td>
-
-                                                    <td>
-                                                        <a href="#" class="btn btn-primary btn-sm btn-block"><i class="far fa-edit"></i> Edit</a>                                                        
-                                                        <a href="#" class="btn btn-danger btn-sm btn-block mt-2"><i class="fas fa-trash"></i> Delete</a>                                                        
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <div className="row">
-                                                            <div className="col">
-                                                                <div class="blog_list"><img class="img-fluid d-none d-lg-block" alt="image" src="https://via.placeholder.com/180x120" style={{height: "150px"}} /></div>
-                                                            </div>
-                                                            <div className="col-8">
-                                                                <h4> Vivamus condimentum rutrum odio</h4>
-                                                                <p>Posted by <b>Administrator</b> at Nov 29 2018</p>
-                                                                <p>Nulla cursus maximus lacus at efficitur. In lobortis ante vitae nulla semper, in volutpat libero aliquet. Morbi sit amet nibh vitae metus interdum finibus sed nec nisl. Ut quam dolor, bibendum id maximus ut, suscipit consectetur sem.</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <td>News</td>
-
-                                                    <td>
-                                                        <a href="#" class="btn btn-primary btn-sm btn-block"><i class="far fa-edit"></i> Edit</a>                                                        
-                                                        <a href="#" class="btn btn-danger btn-sm btn-block mt-2"><i class="fas fa-trash"></i> Delete</a>                                                        
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <div className="row">
-                                                            <div className="col">
-                                                                <div class="blog_list"><img class="img-fluid d-none d-lg-block" alt="image" src="https://via.placeholder.com/180x120" style={{height: "150px"}} /></div>
-                                                            </div>
-                                                            <div className="col-8">
-                                                                <h4> Vivamus condimentum rutrum odio</h4>
-                                                                <p>Posted by <b>Administrator</b> at Nov 29 2018</p>
-                                                                <p>Nulla cursus maximus lacus at efficitur. In lobortis ante vitae nulla semper, in volutpat libero aliquet. Morbi sit amet nibh vitae metus interdum finibus sed nec nisl. Ut quam dolor, bibendum id maximus ut, suscipit consectetur sem.</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <td>News</td>
-
-                                                    <td>
-                                                        <a href="#" class="btn btn-primary btn-sm btn-block"><i class="far fa-edit"></i> Edit</a>                                                        
-                                                        <a href="#" class="btn btn-danger btn-sm btn-block mt-2"><i class="fas fa-trash"></i> Delete</a>                                                        
-                                                    </td>
-                                                </tr>
+                                            ))}
+                                                
+                                                
                                             </tbody>
                                         </table>
                                     </div>
@@ -363,18 +337,50 @@ class AdminBlog extends Component {
                                 </div>
                                 <Modal show={this.state.showHide}>
                                 <Modal.Header closeButton onClick={() => this.handleModalShowHide()}>
-                                <Modal.Title>Add category</Modal.Title>
+                                <Modal.Title>Add post</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
                                     <form>
                                         <div className = "form-group">
                                             <label>
-                                                Name : 
+                                                Title : 
                                             </label>
-                                            <input type = "text" className = "form-control" value = {this.name} onChange = {this.handleTitleChange}/>
+                                            <input type = "text" className = "form-control" onChange = {this.handleTitleChange}/>
                                         </div>
                                         <div className = "form-group">
-                                            <button className = "btn btn-success" onClick={this.handleSubmit}>Add category</button>
+                                            <label>
+                                                Pre content : 
+                                            </label>
+                                            <input type = "text" className = "form-control" onChange = {this.handlePreContentChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Content : 
+                                            </label>
+                                            <textarea className = "form-control" onChange = {this.handleContentChange}></textarea>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Author : 
+                                            </label>
+                                            <input type = "text" className = "form-control" onChange = {this.handleAuthorChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Image URL : 
+                                            </label>
+                                            <input type = "text" className = "form-control" onChange = {this.handleImageUrlChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <Select
+                                                onChange={this.handleChange.bind(this)}
+                                                options={this.state.options}
+                                                required
+                                            />
+                                        </div>
+                                    
+                                        <div className = "form-group">
+                                            <button className = "btn btn-success" onClick={this.handleSubmit}>Add post</button>
                                         </div>
                                     </form>
                                 </Modal.Body>
@@ -387,18 +393,61 @@ class AdminBlog extends Component {
 
                             <Modal show={this.state.editShowHide}>
                                 <Modal.Header closeButton onClick={() => this.handleEditModalHide()}>
-                                <Modal.Title>Edit category</Modal.Title>
+                                <Modal.Title>Edit post</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
                                     <form>
-                                        <div className = "form-group">
+                                    <div className = "form-group">
                                             <label>
-                                                Name : 
+                                                Title : 
                                             </label>
-                                            <input type = "text" className = "form-control" value = { this.state.updateName } onChange = {this.handleUpdateNameChange}/>
+                                            <input type = "text" className = "form-control" value = {this.state.updateTitle} onChange = {this.handleUpdateTitleChange}/>
                                         </div>
                                         <div className = "form-group">
-                                            <button className = "btn btn-success" onClick={this.handleUpdateSubmit}>Edit category</button>
+                                            <label>
+                                                Pre content : 
+                                            </label>
+                                            <input type = "text" className = "form-control" value = {this.state.updatePreContent} onChange = {this.handleUpdatePreContentChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Content : 
+                                            </label>
+                                            <textarea className = "form-control" value = {this.state.updateContent} onChange = {this.handleUpdateContentChange}></textarea>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Author : 
+                                            </label>
+                                            <input type = "text" className = "form-control" value = {this.state.updateAuthor} onChange = {this.handleUpdateAuthorChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Image URL : 
+                                            </label>
+                                            <input type = "text" className = "form-control" value = {this.state.updateImageUrl} onChange = {this.handleUpdateImageUrlChange}/>
+                                        </div>
+                                        <div className = "form-group">
+                                        <Select
+                                            value={this.state.options.filter(option => option.label === this.state.categorySelectEditName)}
+                                            onChange={this.handleChange.bind(this)}
+                                            options={this.state.options}
+                                        />
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Post enabled : 
+                                            </label>
+                                            <input type="checkbox" defaultChecked={this.state.updateEnabled} onClick={ () => this.editEnabled()}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label>
+                                                Comment enabled : 
+                                            </label>
+                                            <input type="checkbox" defaultChecked={this.state.updateCommentEnabled} onClick={ () => this.editCommentEnabled()}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <button className = "btn btn-success" onClick={this.handleUpdateSubmit}>Edit post</button>
                                         </div>
                                     </form>
                                 </Modal.Body>

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const BLOG_POST_API_BASE_URL = "http://localhost:8080/api/posts";
 const BLOG_CATEGORY_API_BASE_URL = "http://localhost:8080/api/post_categories";
+const COMMENT_API_BASE_URL = "http://localhost:8080/api/comments";
 class BlogService{
     getBlogCategories(){
         return axios.get(BLOG_CATEGORY_API_BASE_URL, {
@@ -83,6 +84,22 @@ class BlogService{
             'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
           }
         });
+    }
+
+    createComment(comment){
+      return axios.post(COMMENT_API_BASE_URL, comment, {
+          headers: {
+            'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+          }
+        });
+    }
+
+    getCommentByPostId(postId){
+      return axios.get(COMMENT_API_BASE_URL + '/' + postId, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+        }
+      });
     }
 }
 
