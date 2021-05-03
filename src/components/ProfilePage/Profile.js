@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import UserService from '../../services/UserService';
+import TeacherService from '../../services/TeacherService';
 import Header from '../Header/Header';
 import Footer from '../Footer/Footer';
+import { Alert, Button } from 'react-bootstrap';
 
 export default class Profile extends Component {
   constructor(props) {
@@ -21,6 +23,7 @@ export default class Profile extends Component {
       errors: {},
       successful: false,
       message: "",
+      showTeacherBoard: false
     };
     this.fullNameChangeHandler = this.fullNameChangeHandler.bind(this);
     this.updateFullNameSubmit = this.updateFullNameSubmit.bind(this);
@@ -37,6 +40,16 @@ export default class Profile extends Component {
             // const url = "/profile";
             // this.props.history.push(url);
         });
+    }
+
+    createTeacherPage() {
+      UserService.addTeacherRole(this.state.currentUser.id).then(res =>{
+        // window.location.replace("/profile");
+      });
+      let teacher = {userId: this.state.currentUser.id, email: this.state.currentUser.email};
+      TeacherService.createInitialTeacher(teacher).then(res => {
+        window.location.replace("/profile");
+      });
     }
 
     updatePasswordSubmit = (event) => {
@@ -124,8 +137,13 @@ export default class Profile extends Component {
     if(response.status>=200 && response.status < 300){
         let res = await response.json();
         this.setState({currentUser: res});
-        this.setState({email: this.state.currentUser.email, fullName: this.state.currentUser.fullName})
-        console.log(res);
+        this.setState({email: this.state.currentUser.email, fullName: this.state.currentUser.fullName});
+        res.roles.map((role) => {
+          if(role.role == "ROLE_TEACHER"){
+              this.setState({showTeacherBoard: true});
+          }
+      });
+        // console.log(res);
     } 
     else{
         window.location.replace("/");
@@ -149,11 +167,20 @@ export default class Profile extends Component {
     if (this.state.redirect) {
         return <Redirect to={this.state.redirect} />
     }
+    const { showTeacherBoard } = this.state;
 
     return (
         <div>
           <Header />
           <div className="container" style={{marginTop: "150px"}}>
+            {!showTeacherBoard && (
+              <Alert variant="primary">
+                You don't have teacher page! 
+                Click <Alert.Link onClick={() => this.createTeacherPage()}>here</Alert.Link> to create teacher account!
+                
+                
+              </Alert>
+            )}
             {(this.state.userReady) ?
             <div className="row mt-3">
                 <div className="col-6 mx-auto">

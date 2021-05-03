@@ -14,6 +14,11 @@ import {
 import Home from './components/Home';
 import Post from './components/PostPage/Post';
 import Blog from './components/BlogPage/Blog';
+import Teacher from './components/TeacherPage/Teacher';
+import TeacherCarier from './components/TeacherPage/TeacherCarier';
+import TeacherFeedback from './components/TeacherPage/TeacherFeedback';
+import TeacherSubjects from './components/TeacherPage/TeacherSubjects';
+import TeacherInfo from './components/TeacherPage/TeacherInfo';
 import Login from './components/LoginPage/Login';
 import Admin from './components/AdminPage/Admin';
 import AdminBlog from './components/AdminPage/AdminBlog';
@@ -38,6 +43,11 @@ class App extends Component {
           <Route exact path={'/'} component={Home}/>
           <Route exact path={'/post/:id'} component={Post}/>
           <Route exact path={'/blog'} component={Blog}/>
+          <Route exact path={'/teacher'} component={Teacher}/>
+          <Route exact path={'/teacher/:id'} component={TeacherInfo}/>
+          <Route exact path={'/teacher/carier'} component={TeacherCarier}/>
+          <Route exact path={'/teacher/subjects'} component={TeacherSubjects}/>
+          <Route exact path={'/teacher/feedbacks'} component={TeacherFeedback}/>
           <Route exact path={'/feedback'} component={SystemUserFeedback}/>
           <Route exact path={'/admin'} component={Admin}/>
           <Route exact path={'/admin/blog'} component={AdminBlog}/>

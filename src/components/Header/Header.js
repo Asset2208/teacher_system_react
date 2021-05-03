@@ -14,6 +14,7 @@ class Header extends Component {
         this.state = {
             showModeratorBoard: false,
             showAdminBoard: false,
+            showTeacherBoard: false,
             currentUser: undefined,
             jwtToken: ""
         };
@@ -58,6 +59,9 @@ class Header extends Component {
                         else if(role.role == "ROLE_MODERATOR"){
                             this.setState({showModeratorBoard: true});
                         }
+                        else if(role.role == "ROLE_TEACHER"){
+                            this.setState({showTeacherBoard: true});
+                        }
                     });
                     this.setState({
                         currentUser: res,
@@ -77,7 +81,7 @@ class Header extends Component {
     }
 
     render() {
-        const { currentUser, showModeratorBoard, showAdminBoard } = this.state;
+        const { currentUser, showModeratorBoard, showAdminBoard, showTeacherBoard } = this.state;
         return (
                 <Navbar bg="light"  className="fixed-top mb-5">
                     <div className="container">
@@ -113,7 +117,13 @@ class Header extends Component {
                                 <Link to="/admin" className="nav-link">
                                 Admin Board
                                 </Link>
-                                <Link to={"/add-card/_add"} className="nav-link">Add Card</Link>
+                            </Nav>
+                            )}
+                            {showTeacherBoard && (
+                            <Nav className="nav-item">
+                                <Link to="/teacher" className="nav-link">
+                                Teacher Page
+                                </Link>
                             </Nav>
                             )}
                             

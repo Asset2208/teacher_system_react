@@ -200,7 +200,7 @@ class AdminBlog extends Component {
                     ></script>
                 </head>
                 <header>
-                <nav id="sidebarMenu" className="collapse d-lg-block sidebar collapse bg-white mt-5">
+                    <nav id="sidebarMenu" className="collapse d-lg-block sidebar collapse bg-white mt-5">
                         <div class="position-sticky">
                             <div class="list-group list-group-flush mx-3 mt-4">
                                 

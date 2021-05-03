@@ -46,6 +46,14 @@ class UserService {
     logout() {
         localStorage.removeItem("user");
     }
+
+    addTeacherRole(id){
+        return axios.put(REGISTER_API_BASE_URL + 'addTeacherRole/' + id, id,{
+            headers: {
+              'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+            }
+          });
+    }
 }
 
 export default new UserService();
