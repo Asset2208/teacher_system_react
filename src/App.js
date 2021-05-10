@@ -33,6 +33,7 @@ import Footer from './components/Footer/Footer';
 import Header from './components/Header/Header';
 import Registration from './components/RegisterPage/Registration';
 import Profile from './components/ProfilePage/Profile';
+import UserFeedbackTeacherPage from './components/UserFeedback/UserFeedbackTeacherPage';
 
 class App extends Component {
   render() {
@@ -44,10 +45,11 @@ class App extends Component {
           <Route exact path={'/post/:id'} component={Post}/>
           <Route exact path={'/blog'} component={Blog}/>
           <Route exact path={'/teacher'} component={Teacher}/>
-          <Route exact path={'/teacher/:id'} component={TeacherInfo}/>
           <Route exact path={'/teacher/carier'} component={TeacherCarier}/>
           <Route exact path={'/teacher/subjects'} component={TeacherSubjects}/>
           <Route exact path={'/teacher/feedbacks'} component={TeacherFeedback}/>
+          <Route exact path={'/teacher/:id'} component={TeacherInfo}/>
+          <Route exact path={'/teacher/:id/feedbacks'} component={UserFeedbackTeacherPage}/>
           <Route exact path={'/feedback'} component={SystemUserFeedback}/>
           <Route exact path={'/admin'} component={Admin}/>
           <Route exact path={'/admin/blog'} component={AdminBlog}/>

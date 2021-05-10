@@ -5,6 +5,10 @@ const TEACHER_V3_API_BASE_URL = "http://localhost:8080/api/v3/teachers";
 
 class BlogService{
 
+    getAllTeachersEnabled(){
+      return axios.get(TEACHER_V3_API_BASE_URL);
+    }
+
     getTeacherDTOByUserId(id){
         return axios.get(TEACHER_API_BASE_URL + '/dto/user/' + id, {
             headers: {
@@ -70,6 +74,18 @@ class BlogService{
               'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
             }
           });
+    }
+
+    getAllFeedbacksByTeacherId(id) {
+      return axios.get(TEACHER_V3_API_BASE_URL + '/feedbacks/' + id);
+    }
+
+    addTeacherFeedback(feedback) {
+      return axios.post(TEACHER_V3_API_BASE_URL + '/feedbacks/add', feedback);
+    }
+
+    getTeacherFeedbackCountByTeacherId(id){
+      return axios.get(TEACHER_V3_API_BASE_URL + '/feedbacks/' + id + "/count");
     }
 
 

@@ -1,20 +1,15 @@
 import React, { Component } from 'react'
 import Header from '../Header/Header';
 import TeacherService from '../../services/TeacherService';
-import CityService from '../../services/CityService';
+import {  Button, Modal, Alert  } from 'react-bootstrap';
 import {
     BrowserRouter as Router,
     Switch,
     Route,
     Link
   } from "react-router-dom";
-import Select from 'react-select';
 
-import '../AdminPage/css/admin.css';
-// import './css/admin.css';
-
-export default class TeacherInfo extends Component {
-
+export default class UserFeedbackTeacherPage extends Component {
     constructor(props) {
         super(props);
 
@@ -36,22 +31,68 @@ export default class TeacherInfo extends Component {
             imageUrl: "",
             cityName: "",
             phoneNumber: "",
-            old_password: "",
-            new_password: "",
-            repeat_new_password: "",
             errors: {},
-            IsTeachOnline: false,
             message: "",
-            showTeacherBoard: false,
             cityEntity: {},
             cities: [],
             cityOptions: [],
-            experiences: [],
-            educations: [],
-            achievements: [],
-            feedbackCount: 0
+            feedbacks: [],
+            showHide : false,
+            feedbackFullName : "",
+            feedbackEmail : "",
+            feedbackPluses : "",
+            feedbackMinuses : "",
+            feedbackReply : "",
+            feedbackMark: ""
         };
 
+        this.handleChangeEmail = this.handleChangeEmail.bind(this);
+        this.handleChangeFullName = this.handleChangeFullName.bind(this);
+        this.handlePlusesChange = this.handlePlusesChange.bind(this);
+        this.handleMinusesChange = this.handleMinusesChange.bind(this);
+        this.handleReplyChange = this.handleReplyChange.bind(this);
+        this.handleMarkChange = this.handleMarkChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+
+    }
+    handleChangeFullName = event =>{
+        this.setState({feedbackFullName: event.target.value});
+    }
+    handleChangeEmail = event =>{
+        this.setState({feedbackEmail: event.target.value});
+    }
+    handlePlusesChange = event =>{
+        this.setState({feedbackPluses: event.target.value});
+    }
+    handleMinusesChange = event =>{
+        this.setState({feedbackMinuses: event.target.value});
+    }
+    handleReplyChange = event =>{
+        this.setState({feedbackReply: event.target.value});
+    }
+    handleMarkChange = event =>{
+        this.setState({feedbackMark: event.target.value});
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+        let feedbackBody = {
+            email: this.state.feedbackEmail,
+            fullName: this.state.feedbackFullName,
+            pluses: this.state.feedbackPluses,
+            minuses: this.state.feedbackMinuses,
+            reply: this.state.feedbackReply,
+            dateCreated: new Date(),
+            mark: this.state.feedbackMark,
+            teacherId: this.state.teacherEntity.id,
+            enabled: false
+        };
+
+        // console.log('city => ' + JSON.stringify(postBody));
+
+        TeacherService.addTeacherFeedback(feedbackBody).then(res =>{
+            window.location.replace("/teacher/" + this.state.id);
+        });
     }
 
 
@@ -62,27 +103,22 @@ export default class TeacherInfo extends Component {
                 email: this.state.teacherEntity.email, 
                 name: this.state.teacherEntity.name,
                 surname: this.state.teacherEntity.surname,
-                patronymic: this.state.teacherEntity.patronymic,
-                IsTeachOnline: this.state.teacherEntity.isOnlineEnabled,
-                title: this.state.teacherEntity.title,
-                subjects: this.state.teacherEntity.subjects,
-                story: this.state.teacherEntity.story,
-                imageUrl: this.state.teacherEntity.imageUrl,
-                phoneNumber: this.state.teacherEntity.phoneNumber,
-                experiences: this.state.teacherEntity.experiences,
-                educations: this.state.teacherEntity.educations,
-                achievements: this.state.teacherEntity.achievements,
-                cityName: this.state.teacherEntity.city.city
             });
 
             // console.log('teacher => ' + JSON.stringify(this.state.teacherEntity));
         });
-        TeacherService.getTeacherFeedbackCountByTeacherId(this.state.id).then(res => {
-            this.setState({feedbackCount: res.data});
-            console.log(this.state.feedbackCount);
-        });
+
+        TeacherService.getAllFeedbacksByTeacherId(this.state.id).then(res => {
+            this.setState({feedbacks: res.data});
+            console.log(res.data);
+        })
 
     }
+
+    handleModalShowHide() {
+        this.setState({ showHide: !this.state.showHide })
+    }
+
 
     render() {
         return (
@@ -91,7 +127,7 @@ export default class TeacherInfo extends Component {
                 <div className="container" style={{marginTop: "150px"}}>
                     <div className="row">
                         <div className="col">
-                            <div class="bs-example">
+                        <div class="bs-example">
                                 <div class="list-group">
                                     <div class="list-group-item list-group-item-action">
                                         <div class="row">
@@ -207,9 +243,15 @@ export default class TeacherInfo extends Component {
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <style>{`
+                                    a:hover{
+                                        text-decoration: underline;
+                                    }
+                                `}</style>
                                 <div class="row mt-2">
                                     <div class="col-sm-4" style={{width: "32.5%"}}>
-                                        <a asp-action="Details" asp-controller="Teachers" asp-route-id="@Model.Id" class="stretched-link"></a>
+                                        <a class="stretched-link"></a>
                                         <div class="bg-image hover-overlay shadow-1-strong rounded ripple" style={{maxHeight: "450px"}}>
                                             <img class="d-block" style={{maxHeight: "100px"}} src="https://picsum.photos/150?image=641" alt=""/>
                                         </div>
@@ -252,64 +294,137 @@ export default class TeacherInfo extends Component {
                             </div>
                         </div>
                         <div className="col-8">
-                        <div>
-                            <h4>Репетитор {this.state.name} {this.state.surname} {this.state.patronymic}</h4>
-                            <hr />
-                            <div class="card border-3">
-                                <div class="row">
-                                    <div class="col-sm-3">
-                                        <img class="d-block" style={{width: "100%"}} src={this.state.imageUrl} alt=""/>
-                                        <p class="text-center mb-0" style={{fontSize: "9px"}}>оценка</p>
-                                        <p class="text-center mb-0 p-0 border-bottom" style={{fontSize: "20px"}}>5,00</p>
-                                        <p class="text-center mb-0" style={{fontSize: "20px"}}><Link to={this.state.teacherEntity.id + "/feedbacks"} style={{textDecoration: "underline"}}>{this.state.feedbackCount} отзывов</Link></p>
-                                        <div class="text-center"><img src="https://alm.kz.repetitors.info/doc/rank/i/badge_great.png" width="60%" /></div>
+                            <div>
+                                <p className="d-inline" style={{fontSize: "15px",}} class="mb-0 pb-0">
+                                    <a href="#" onClick={() => this.handleModalShowHide()}>Добавить отзыв о репетиторе</a>
+                                    |
+                                    <Link to="/feedback">Добавить отзыв о сервисе</Link>
+                                </p>
+                                <h4>Отзывы репетитора <Link to={"/teacher/" + this.state.id}>{this.state.name} {this.state.surname}</Link> </h4>
+                                <hr />
+                                <div>
+                                    {this.state.feedbacks.map(feedback=>(
+                                        <div class="row">
                                         
-                                    </div>
-                                    <div class="col-sm-8 p-0" style={{fontSize: "15px"}}>
-                                        <p class="mb-0"><strong>{this.state.name} {this.state.surname} {this.state.patronymic}</strong></p>
-                                        {this.state.IsTeachOnline && (
-                                            <p style={{color: "oranged"}} class="mb-0"><strong>Проводит дистанционные занятия</strong></p>
-                                        )}
-                                        
-                                        <p class="mb-0">Репетитор по {this.state.title}</p>
-                                        {this.state.educations != null && (
-                                            <div>
-                                                <p class="mb-0">Образование: </p>
-                                                {this.state.educations.map(education => (
-                                                    <p class="mb-0">• {education.universityName}, специальность - {education.speciality}, {education.dateStart}-{education.dateEnd}</p>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {this.state.experiences != null && (
-                                            <div>
-                                                <p class="mb-0">Опыт: </p>
-                                                {this.state.experiences.map(experience => (
-                                                    <p class="mb-0">• {experience.experienceTitle}, {experience.dateStart}-{experience.dateEnd}</p>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {this.state.achievements != null && (
-                                            <div>
-                                                <p class="mb-0">Достижения: </p>
-                                                {this.state.achievements.map(achievement => (
-                                                    <p class="mb-0">• {achievement.achievementTitle}, {achievement.duration}</p>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        <br />
-                                        <p><i>{this.state.story}</i></p>
-                                        <p class="mb-0 text-muted">Город: {this.state.cityName}</p>
-                                        <p class="mb-0 text-muted">Предметы: {this.state.subjects}</p>
-                                    </div>
+                                            <div className="card">
+                                            <div class="col">
+                                                <h5><Link to={"/teacher/" + this.state.id}>{this.state.name} {this.state.surname}</Link></h5>
+                                                {feedback.pluses != "" && (
+                                                    <p style={{fontSize: "15px"}} class="mb-0 pb-0">
+                                                        <b>Плюсы:</b> {feedback.pluses}
+                                                    </p>
+                                                )}
+                                                {feedback.minuses != "" && (
+                                                    <p style={{fontSize: "15px"}} class="mb-0 pb-0">
+                                                        <b>Минусы:</b> {feedback.minuses}
+                                                    </p>
+                                                )}
+                                                <p style={{fontSize: "15px"}} class="mb-0 pb-0">
+                                                    <b>Описание:</b> {feedback.reply}
+                                                </p>
+                                                <p style={{fontSize: "15px"}} class="mb-0 pb-0">
+                                                    <b>Оценка:</b> {feedback.mark}
+                                                </p>
+                                                <p>
+                                                    <i>{feedback.fullName}</i>
+                                                </p>
+                                                
                                     
+                                                <div class="row">
+                                                
+                                                    <p className="text-muted"><p><span><i class="far fa-calendar-alt"></i></span> {new Date(parseInt(Date.parse(feedback.dateCreated))).toLocaleString({ year: 'numeric', month: '2-digit', day: '2-digit'})}</p>
+                                                    
+                                                    {/* <strong>|</strong> <span><i class="far fa-eye"></i></span>{post.views} <strong>|</strong> <span><i class="far fa-comment"></i></span> 5 */}
+                                                    </p>
+                                                </div>
+                                                
+                                            
+                                            </div>
+                                        </div>
+                                        <hr className="mb-2"/>
+                                        
+                                    </div>
+                                    ))}
                                 </div>
                             </div>
-                            
-                        </div>
                         </div>
                     </div>
                 </div>
+                <Modal show={this.state.showHide}>
+                    <Modal.Header closeButton onClick={() => this.handleModalShowHide()}>
+                    <Modal.Title>Добавить отзыв</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <form>
+                            <div className = "form-group">
+                                <label>
+                                    Репетитор : 
+                                </label>
+                                <input type = "text" className = "form-control" value={this.state.name + " " + this.state.surname} readOnly/>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Email: 
+                                </label>
+                                <input type = "email" className = "form-control" onChange = {this.handleChangeEmail} required/>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Ваше полное имя : 
+                                </label>
+                                <input type = "text" className = "form-control" onChange = {this.handleChangeFullName} required/>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Плюсы : 
+                                </label>
+                                <textarea className = "form-control" onChange = {this.handlePlusesChange}></textarea>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Минусы : 
+                                </label>
+                                <textarea className = "form-control" onChange = {this.handleMinusesChange}></textarea>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Отзыв : 
+                                </label>
+                                <textarea className = "form-control" onChange = {this.handleReplyChange} required></textarea>
+                            </div>
+                            <div className="form-group">
+                                <label>
+                                    Оценка : 
+                                </label>
+                                <div onChange={this.handleMarkChange}>
+                                    <input type="radio" value="1" name="mark" />1 
+                                    <input type="radio" value="2" name="mark" />2 
+                                    <input type="radio" value="3" name="mark" />3 
+                                    <input type="radio" value="3+" name="mark" />3+ 
+                                    <input type="radio" value="4" name="mark" />4 
+                                    <input type="radio" value="4+" name="mark" />4+ 
+                                    <input type="radio" value="5" name="mark" />5 
+                                    <input type="radio" value="5+" name="mark" />5+ 
+                                </div>
+                            </div>
+
+                            <Alert variant="primary">
+                                Отзыв будет опубликован после проверки модератором
+
+                            </Alert>
+
+                        
+                            <div className = "form-group">
+                                <button className = "btn btn-success" onClick={this.handleSubmit}>Добавить отзыв</button>
+                            </div>
+                        </form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                    <Button variant="secondary" onClick={() => this.handleModalShowHide()}>
+                        Закрыть
+                    </Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         )
     }

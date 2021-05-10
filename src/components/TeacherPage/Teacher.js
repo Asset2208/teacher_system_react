@@ -62,6 +62,8 @@ export default class Teacher extends Component {
         // this.updatePasswordSubmit = this.updatePasswordSubmit.bind(this);
     }
 
+    
+
     updateMainDetailsSubmit = (event) => {
         event.preventDefault();
 
@@ -77,7 +79,7 @@ export default class Teacher extends Component {
             subjects: this.state.subjects,
             story: this.state.story,
             imageUrl: this.state.imageUrl,
-            isEnabledAccount: false,
+            isEnabledAccount: true,
             city: this.state.cityEntity 
         };
 
@@ -162,6 +164,15 @@ export default class Teacher extends Component {
     
         this.setState({ userReady: true })
 
+        CityService.getCities().then((res) => {
+            this.setState({ cities: res.data});
+            const options = this.state.cities.map(d => ({
+                "value" : d.id,
+                "label" : d.city
+              }));
+              this.setState({ cityOptions: options});
+        });
+
         TeacherService.getTeacherDTOByUserId(this.state.currentUser.id).then(res => {
             this.setState({teacherEntity: res.data});
             this.setState({
@@ -181,15 +192,7 @@ export default class Teacher extends Component {
 
             console.log('teacher => ' + JSON.stringify(this.state.teacherEntity));
         });
-        CityService.getCities().then((res) => {
-            this.setState({ cities: res.data});
-
-            const options = this.state.cities.map(d => ({
-                "value" : d.id,
-                "label" : d.city
-              }));
-              this.setState({ cityOptions: options});
-        });
+        
       }
 
     render() {
@@ -202,7 +205,8 @@ export default class Teacher extends Component {
                                 <Link to="/teacher" class="list-group-item list-group-item-action py-2 ripple active"><i class="fas fa-tachometer-alt fa-fw me-3"></i><span>Основные данные</span></Link>
                                 <Link to="/teacher/carier" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-newspaper fa-fw me-3"></i><span>Карьера</span></Link>
                                 <Link to="/teacher/subjects" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-chart-line fa-fw me-3"></i><span>Предметная область</span></Link>
-                                <Link to="/teacher/feedbacks" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>Отзывы обо мне</span></Link>
+                                <Link to={"/teacher/" + this.state.teacherEntity.id + "/feedbacks"} className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>Отзывы обо мне</span></Link>
+                                
                             </div>
                         </div>
                     </nav>
