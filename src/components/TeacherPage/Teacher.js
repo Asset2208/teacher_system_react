@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import Header from '../Header/Header';
 import TeacherService from '../../services/TeacherService';
 import CityService from '../../services/CityService';
+import SubjectService from '../../services/SubjectService';
 import {
     BrowserRouter as Router,
     Switch,
@@ -44,7 +45,10 @@ export default class Teacher extends Component {
             showTeacherBoard: false,
             cityEntity: {},
             cities: [],
-            cityOptions: []
+            cityOptions: [],
+            subjectOptions: [],
+            selectedSubjects: [],
+            subjectNames: []
         };
         this.nameChangeHandler = this.nameChangeHandler.bind(this);
         this.surnameChangeHandler = this.surnameChangeHandler.bind(this);
@@ -55,6 +59,7 @@ export default class Teacher extends Component {
         this.storyChangeHandler = this.storyChangeHandler.bind(this);
         this.subjectsChangeHandler = this.subjectsChangeHandler.bind(this);
         this.imageChangeHandler = this.imageChangeHandler.bind(this);
+        // this.handleSubjectChange = this.handleSubjectChange.bind(this);
 
         // this.oldPasswordChangeHandler = this.oldPasswordChangeHandler.bind(this);
         // this.newPasswordChangeHandler = this.newPasswordChangeHandler.bind(this);
@@ -80,11 +85,18 @@ export default class Teacher extends Component {
             story: this.state.story,
             imageUrl: this.state.imageUrl,
             isEnabledAccount: true,
-            city: this.state.cityEntity 
+            city: this.state.cityEntity
         };
 
+        let subjectBody = {
+            teacherId: this.state.teacherEntity.id,
+            subjectIds: this.state.selectedSubjects
+        }
+
         TeacherService.updateTeacherMainDetails(this.state.teacherEntity.id, teacherBody).then(res =>{
-            window.location.replace("/teacher");
+            // TeacherService.addTeacherSubjects(subjectBody).then(res => {
+                window.location.replace("/teacher");
+            // });
             // const url = "/profile";
             // this.props.history.push(url);
         });
@@ -190,10 +202,23 @@ export default class Teacher extends Component {
                 this.setState({cityName: this.state.teacherEntity.city.city, cityEntity: this.state.teacherEntity.city});
             }
 
-            console.log('teacher => ' + JSON.stringify(this.state.teacherEntity));
+            // console.log('teacher => ' + JSON.stringify(this.state.teacherEntity));
         });
         
+        // SubjectService.getAllSubjects().then(res => {
+        //     this.setState({subjectNames: res.data});
+        //     const options = this.state.subjectNames.map(d => ({
+        //         "value" : d.id,
+        //         "label" : d.name
+        //       }));
+        //       this.setState({ subjectOptions: options});
+        // });
+        
       }
+
+    //   handleSubjectChange = (e) => {
+    //     this.setState({selectedSubjects: e.map(x => x.value)});
+    //   }
 
     render() {
         return (
@@ -255,11 +280,25 @@ export default class Teacher extends Component {
                                     <textarea type="text" required className="form-control" value={this.state.subjects} onChange = {this.subjectsChangeHandler}></textarea>
                                     <small className="form-text text-muted">Можете перечислить основные предметы</small>
                                 </div>
+                                {/* <div className="form-group">
+                                    <label>Subjects</label>
+                                    <Select
+                                        isMulti
+                                        name="colors"
+                                        options={this.state.subjectOptions}
+                                        // value={this.state.subjectOptions.filter(option => option.label === )}
+                                        className="basic-multi-select"
+                                        classNamePrefix="select"
+                                        onChange={this.handleSubjectChange}
+                                    />
+
+                                </div> */}
                                 <div className="form-group">
                                     <label>ImageUrl</label>
                                     <input type="text" required className="form-control" value={this.state.imageUrl} onChange = {this.imageChangeHandler} />
                                     <small className="form-text text-muted"></small>
                                 </div>
+                                
                                 <div className="form-group">
                                     <label>City</label>
                                     {this.state.cityName == "" && (

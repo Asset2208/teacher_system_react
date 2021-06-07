@@ -34,6 +34,9 @@ import Header from './components/Header/Header';
 import Registration from './components/RegisterPage/Registration';
 import Profile from './components/ProfilePage/Profile';
 import UserFeedbackTeacherPage from './components/UserFeedback/UserFeedbackTeacherPage';
+import AdminTeacherFeedback from './components/AdminPage/AdminTeacherFeedback';
+import AdminSubject from './components/AdminPage/AdminSubject';
+import AdminSubjectBranch from './components/AdminPage/AdminSubjectBranch';
 
 class App extends Component {
   render() {
@@ -59,6 +62,9 @@ class App extends Component {
           <Route exact path={'/admin/districts'} component={AdminDistricts}/>
           <Route exact path={'/admin/s-feedback-category'} component={SystemFeedbackCategory}/>
           <Route exact path={'/admin/s-feedback'} component={SystemFeedback}/>
+          <Route exact path={'/admin/subject'} component={AdminSubject}/>
+          <Route exact path={'/admin/subject-branches'} component={AdminSubjectBranch}/>
+          <Route exact path={'/admin/teacher-feedback'} component={AdminTeacherFeedback}/>
           <Route exact path={'/login'} component={Login}/>
           <Route exact path={'/register'} component={Registration}/>
           <Route exact path={'/profile'} component={Profile} />

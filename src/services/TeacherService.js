@@ -3,7 +3,7 @@ import axios from 'axios';
 const TEACHER_API_BASE_URL = "http://localhost:8080/api/teachers";
 const TEACHER_V3_API_BASE_URL = "http://localhost:8080/api/v3/teachers";
 
-class BlogService{
+class TeacherService{
 
     getAllTeachersEnabled(){
       return axios.get(TEACHER_V3_API_BASE_URL);
@@ -80,12 +80,63 @@ class BlogService{
       return axios.get(TEACHER_V3_API_BASE_URL + '/feedbacks/' + id);
     }
 
+    getTeacherFeedbackById(id) {
+      return axios.get(TEACHER_API_BASE_URL + '/feedbacks/' + id,{
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+        }
+      });
+    }
+
     addTeacherFeedback(feedback) {
       return axios.post(TEACHER_V3_API_BASE_URL + '/feedbacks/add', feedback);
     }
 
     getTeacherFeedbackCountByTeacherId(id){
       return axios.get(TEACHER_V3_API_BASE_URL + '/feedbacks/' + id + "/count");
+    }
+
+    getTeacherFeedbacks(filterType) {
+      return axios.get(TEACHER_API_BASE_URL + '/feedbacks', {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+        },
+        params : {
+          filterType
+        }
+      });
+    }
+
+    updateTeacherFeedback(id, feedback) {
+      return axios.put(TEACHER_API_BASE_URL + '/feedbacks/' + id, feedback, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+        }
+      });
+    }
+
+    updateEnabled(id, isEnabled) {
+      return axios.put(TEACHER_API_BASE_URL + '/feedbacks/enabled/' + id, isEnabled, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+        }
+      });
+    }
+
+    addTeacherSubjects(subjects) {
+      return axios.post(TEACHER_API_BASE_URL + '/subjects', subjects, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+        }
+      });
+    }
+
+    updateTeacherSubjects(subject) {
+      return axios.put(TEACHER_API_BASE_URL + '/subjects', subject, {
+        headers: {
+          'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user'))['jwtToken']}` 
+        }
+      });
     }
 
 
@@ -188,4 +239,4 @@ class BlogService{
     // }
 }
 
-export default new BlogService();
+export default new TeacherService();

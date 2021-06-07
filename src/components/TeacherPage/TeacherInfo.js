@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Header from '../Header/Header';
 import TeacherService from '../../services/TeacherService';
+import { Button, NavDropdown, Table, Modal, Alert  } from 'react-bootstrap'
 import CityService from '../../services/CityService';
 import {
     BrowserRouter as Router,
@@ -49,6 +50,7 @@ export default class TeacherInfo extends Component {
             experiences: [],
             educations: [],
             achievements: [],
+            tSubjects: [],
             feedbackCount: 0
         };
 
@@ -58,6 +60,7 @@ export default class TeacherInfo extends Component {
     componentDidMount() {
         TeacherService.getTeacherDTOByTeacherId(this.state.id).then(res => {
             this.setState({teacherEntity: res.data});
+
             this.setState({
                 email: this.state.teacherEntity.email, 
                 name: this.state.teacherEntity.name,
@@ -72,15 +75,18 @@ export default class TeacherInfo extends Component {
                 experiences: this.state.teacherEntity.experiences,
                 educations: this.state.teacherEntity.educations,
                 achievements: this.state.teacherEntity.achievements,
-                cityName: this.state.teacherEntity.city.city
+                cityName: this.state.teacherEntity.city.city,
+                tSubjects: this.state.teacherEntity.teacherSubjects
             });
 
-            // console.log('teacher => ' + JSON.stringify(this.state.teacherEntity));
+            // console.log('teacher => ' + JSON.stringify(this.state.tSubjects));
         });
         TeacherService.getTeacherFeedbackCountByTeacherId(this.state.id).then(res => {
             this.setState({feedbackCount: res.data});
             console.log(this.state.feedbackCount);
         });
+        
+
 
     }
 
@@ -301,6 +307,26 @@ export default class TeacherInfo extends Component {
                                         <p><i>{this.state.story}</i></p>
                                         <p class="mb-0 text-muted">Город: {this.state.cityName}</p>
                                         <p class="mb-0 text-muted">Предметы: {this.state.subjects}</p>
+                                        <p class="mb-0 text-muted">Контакты: {this.state.teacherEntity.phoneNumber}</p>
+                                        <hr className="my-4"/>
+                                        <Table striped bordered hover>
+                                            <thead>
+                                                <tr>
+                                                <th>Предмет</th>
+                                                <th>Цена</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {this.state.tSubjects.map(subject=>(
+                                                    <tr>
+                                                    <td>{subject.name}</td>
+                                                    <td>{subject.price}</td>
+                                                    
+                                                    </tr>
+                                                ))}
+                                                
+                                            </tbody>
+                                        </Table>
                                     </div>
                                     
                                 </div>

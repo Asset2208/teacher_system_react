@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Form, Button, Navbar, Nav, NavDropdown, FormControl, NavItem, Table, Modal  } from 'react-bootstrap';
+import React, { Component } from 'react'
+import { Button, NavDropdown, Table, Modal, Alert  } from 'react-bootstrap';
 import {
     BrowserRouter as Router,
     Switch,
@@ -10,80 +10,123 @@ import './css/mdb.min.css';
 import './css/admin.css';
 import './css/scroll.css';
 import '../../bootstrap/css/bootstrap.min.css';
-import SystemFeedbackService from '../../services/SystemFeedbackService';
+import SubjectService from '../../services/SubjectService';
 
+import Select from 'react-select';
 
-
-
-class SystemFeedbackCategory extends Component {
-
-    constructor(props){
+export default class AdminSubjectBranch extends Component {
+    constructor(props) {
         super(props);
+
         this.state = {
-            categoryName: "",
-            updateName: "",
+            redirect: null,
+            userReady: false,
+            currentUser: {},
+            teacherEntity: {},
+            jwtToken: "",
+            email: "",
+            fullName: "",
+            errors: {},
+            subjectBranchEntity : {},
+            subjectBranches: [],
+            subjects: [],
+            message: "",
+            options: [],
             showHide : false,
-            editShowHide: false,
-            categories: [],
-            categoryEntity: {}
-        }
+            subjectName: "",
+            updateSubjectName: "",
+            subjectId: 0,
+            subjecSelectEditName: "",
+            updateSelectedId: 0
+        };
 
-        this.handleNameChange = this.handleNameChange.bind(this);
-        this.handleUpdateNameChange = this.handleUpdateNameChange.bind(this);
+        this.handleChangeName = this.handleChangeName.bind(this);
+        this.handleUpdateChangeName = this.handleUpdateChangeName.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleUpdateSubmit = this.handleUpdateSubmit.bind(this);
+
     }
 
-    componentDidMount(){
-        SystemFeedbackService.getSystemFeedbackCategories().then((res) => {
-            this.setState({ categories: res.data});
-        });
+    handleChangeName = event =>{
+        this.setState({subjectName: event.target.value});
+    }
+    handleUpdateChangeName = event =>{
+        this.setState({updateSubjectName: event.target.value});
     }
 
-    handleNameChange = event =>{
-        this.setState({categoryName: event.target.value});
-    }
-    handleUpdateNameChange = event =>{
-        this.setState({updateName: event.target.value});
+    handleEditModalShow(subject) {
+        this.setState({ 
+            subjectBranchEntity: subject, 
+            updateSubjectName: subject.name,
+            updateSelectedId: subject.id,
+            subjecSelectEditName: subject.subject.name,
+            editShowHide: !this.state.editShowHide});
     }
 
     handleModalShowHide() {
         this.setState({ showHide: !this.state.showHide })
     }
 
-    handleEditModalShow(id) {
-        SystemFeedbackService.getSystemFeedbackCategoryById(id).then( res => {
-            this.setState({categoryEntity: res.data});
-            this.setState({updateName: this.state.categoryEntity.name });
-        });
-        this.setState({ editShowHide: !this.state.editShowHide })
-    }
     handleEditModalHide() {
-        this.setState({ editShowHide: !this.state.editShowHide })
+        this.setState({ editShowHide: !this.state.editShowHide });
     }
 
-    handleSubmit = (e) => {
-        e.preventDefault();
-        let categoryBody = {name: this.state.categoryName, enabled: true};
-        // console.log('city => ' + JSON.stringify(categoryBody));
-
-        SystemFeedbackService.createSystemFeedbackСategory(categoryBody).then(res =>{
-            window.location.replace("/admin/s-feedback-category");
+    componentDidMount(){
+        SubjectService.getAllSubjectsBranches().then((res) => {
+            this.setState({ subjectBranches: res.data});
         });
+
+        SubjectService.getAllSubjects().then((res) => {
+            this.setState({ subjects: res.data});
+
+            const options = this.state.subjects.map(d => ({
+                "value" : d.id,
+                "label" : d.name
+              }));
+              this.setState({ options: options});
+        });
+    }
+
+    handleChange(e){
+        this.setState({subjectId: e.value});
     }
 
     handleUpdateSubmit = (e) => {
         e.preventDefault();
-        let categoryBody = {name: this.state.updateName};
-        // console.log('city => ' + JSON.stringify(categoryBody));
 
-        SystemFeedbackService.updateSystemFeedbackCategory(categoryBody, this.state.categoryEntity.id).then(res =>{
-            window.location.replace("/admin/blog/s-feedback-category");
+        let subjectBranchBody = {
+            id: this.state.updateSelectedId,
+            name: this.state.updateSubjectName,
+            subjectId: this.state.subjectId
+        };
+
+        SubjectService.updateSubjectBranch(subjectBranchBody).then(res => {
+            SubjectService.getAllSubjectsBranches("all").then((res) => {
+                this.setState({ subjectBranches: res.data});
+                this.setState({ subjectName: ""});
+                // this.setState({ showHide: !this.state.showHide });
+                this.setState({ editShowHide: !this.state.editShowHide });
+            })
+        }    
+        );
+
+        
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+        
+        let subject = {name: this.state.subjectName, subjectId: this.state.subjectId};
+        console.log(subject);
+        SubjectService.addSubjectBranch(subject).then(res =>{
+            SubjectService.getAllSubjectsBranches().then((res) => {
+                this.setState({ subjectBranches: res.data});
+                this.setState({ subjectName: ""});
+                this.setState({ showHide: !this.state.showHide });
+            })
         });
     }
 
     render() {
-
         return (
             <div>
                 <head>
@@ -105,7 +148,7 @@ class SystemFeedbackCategory extends Component {
                                     <i class="fas fa-chart-area fa-fw me-3"></i><span>Webiste traffic </span>
                                 </a>
                                 <Link to="/admin/blog" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-newspaper fa-fw me-3"></i><span>Blog</span></Link>
-                                <Link to="/admin/blog/category" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-newspaper fa-fw me-3"></i><span>Blog categories</span></Link>
+                                <Link to="/admin/blog/category" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-newspaper fa-fw me-3"></i><span>Blog Category</span></Link>
                                 <a href="#" class="list-group-item list-group-item-action py-2 ripple"><i
                                     class="fas fa-chart-line fa-fw me-3"></i><span>Analytics</span></a>
                                 <a href="#" class="list-group-item list-group-item-action py-2 ripple"><i
@@ -114,10 +157,10 @@ class SystemFeedbackCategory extends Component {
                                 <Link to="/admin/cities" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-city me-3"></i><span>Cities</span></Link>
                                 <Link to="/admin/districts" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-building me-3"></i><span>Districts</span></Link>
                                 <Link to="/admin/s-feedback" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>System feedback</span></Link>
-                                <Link to="/admin/s-feedback-category" className="list-group-item list-group-item-action py-2 ripple active"><i class="far fa-comment-dots me-3"></i><span>System feedback category</span></Link>
+                                <Link to="/admin/s-feedback-category" className="list-group-item list-group-item-action py-2 ripple"><i class="far fa-comment-dots me-3"></i><span>System feedback category</span></Link>
                                 <Link to="/admin/teacher-feedback" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>Teacher feedback</span></Link>
                                 <Link to="/admin/subject" className="list-group-item list-group-item-action py-2 ripple"><i className="fas fa-users fa-book me-3"></i><span>Subjects</span></Link>
-                                <Link to="/admin/subject-branches" className="list-group-item list-group-item-action py-2 ripple"><i className="fas fa-users fa-book me-3"></i><span>Subjects branches</span></Link>
+                                <Link to="/admin/subject-branches" className="list-group-item list-group-item-action py-2 ripple active"><i className="fas fa-users fa-book me-3"></i><span>Subjects branches</span></Link>
                             </div>
                         </div>
                     </nav>
@@ -168,30 +211,36 @@ class SystemFeedbackCategory extends Component {
                 <div class="container" style={{width: "75%", marginLeft: "300px", marginTop: "100px"}}>
                 
                     <div class="row">
-                        <h1 class="main-title float-left">System feedback categories</h1>
+                        <div className="col-10">
+                            <h1 class="main-title float-left">Предметы</h1>
+                        </div>
+                        <div className="col">
+                            <Button variant="primary" onClick={() => this.handleModalShowHide()}>
+                                Добавить предмет
+                            </Button>
+                        </div>
+                        
                     </div>
 
-                    <Button variant="primary" onClick={() => this.handleModalShowHide()} className="mb-2">
-                        Add category
-                    </Button>
+                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>
                             <th>#</th>
-                            <th>Category name</th>
+                            <th>Subject name</th>
                             <th>Operations</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {this.state.categories.map(category=>(
+                            {this.state.subjectBranches.map(subject=>(
                                 <tr>
-                                <td>{category.id}</td>
-                                <td>{category.name}</td>
+                                <td>{subject.id}</td>
+                                <td>{subject.name}</td>
                                 <td>
-                                <Button className="btn btn-primary btn-sm" onClick={() => this.handleEditModalShow(category.id)}>
+                                
+                                <Button className="btn btn-primary btn-sm" onClick={() => this.handleEditModalShow(subject)}>
                                     <i class="far fa-edit"></i> Edit 
-                                </Button>
-                                    <a href="#" class="btn btn-danger btn-sm ml-3"><i class="fas fa-trash"></i> Delete</a>                                                        
+                                </Button>                                                        
                                 </td>
                                 </tr>
                             ))}
@@ -202,31 +251,37 @@ class SystemFeedbackCategory extends Component {
                 </div>  
                 <Modal show={this.state.showHide}>
                     <Modal.Header closeButton onClick={() => this.handleModalShowHide()}>
-                    <Modal.Title>Add category</Modal.Title>
+                    <Modal.Title>Добавить направление</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <form>
                             <div className = "form-group">
                                 <label>
-                                    Name : 
+                                    Название направления : 
                                 </label>
-                                <input type = "text" className = "form-control" value = {this.name} onChange = {this.handleNameChange}/>
+                                <input type = "text" className = "form-control" value = {this.state.subjectName} onChange = {this.handleChangeName}/>
                             </div>
                             <div className = "form-group">
-                                <button className = "btn btn-success" onClick={this.handleSubmit}>Add category</button>
+                            <Select
+                                onChange={this.handleChange.bind(this)}
+                                options={this.state.options}
+                                required
+                            />
+                            </div>
+                            <div className = "form-group">
+                                <button className = "btn btn-success" onClick={this.handleSubmit}>Сохранить</button>
                             </div>
                         </form>
                     </Modal.Body>
                     <Modal.Footer>
                     <Button variant="secondary" onClick={() => this.handleModalShowHide()}>
-                        Close
+                        Закрыть
                     </Button>
                     </Modal.Footer>
                 </Modal>
-
                 <Modal show={this.state.editShowHide}>
                     <Modal.Header closeButton onClick={() => this.handleEditModalHide()}>
-                    <Modal.Title>Edit category</Modal.Title>
+                    <Modal.Title>Изменить предмет</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <form>
@@ -234,23 +289,29 @@ class SystemFeedbackCategory extends Component {
                                 <label>
                                     Name : 
                                 </label>
-                                <input type = "text" className = "form-control" value = { this.state.updateName } onChange = {this.handleUpdateNameChange}/>
+                                <input type = "text" className = "form-control" value = { this.state.updateSubjectName } onChange = {this.handleUpdateChangeName}/>
                             </div>
                             <div className = "form-group">
-                                <button className = "btn btn-success" onClick={this.handleUpdateSubmit}>Edit category</button>
+                            <Select
+                                value={this.state.options.filter(option => option.label === this.state.subjecSelectEditName)}
+                                onChange={this.handleChange.bind(this)}
+                                options={this.state.options}
+                            />
+                            </div>
+                            <hr className="my-4"/>
+                            <div className = "form-group">
+                                <button className = "btn btn-success" onClick={this.handleUpdateSubmit}>Сохранить изменения</button>
                             </div>
                         </form>
                     </Modal.Body>
                     <Modal.Footer>
                     <Button variant="secondary" onClick={() => this.handleEditModalHide()}>
-                        Close
+                        Закрыть
                     </Button>
                     </Modal.Footer>
                 </Modal>
+                
             </div>
-            
-        );
+        )
     }
 }
-
-export default SystemFeedbackCategory;

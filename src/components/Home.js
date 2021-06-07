@@ -126,7 +126,7 @@ class Home extends Component {
                         <div class="profile-card-4 text-center"><img style={{height: "200px"}} src={teacher.imageUrl} class="img img-responsive"/>
                             <a href={"teacher/" + teacher.id} class="stretched-link"></a>
                             <div class="profile-content">
-                                <div class="profile-name">{teacher.name} {teacher.surname}
+                                <div class="profile-name" style={{color: "black"}}>{teacher.name} {teacher.surname}
                                     <p>@johndoedesigner</p>
                                 </div>
                                 <div class="profile-description">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor.</div>

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Form, Button, Navbar, Nav, NavDropdown, FormControl, NavItem, Table, Modal } from 'react-bootstrap';
+import React, { Component } from 'react'
+import { Button, NavDropdown, Table, Modal, Alert  } from 'react-bootstrap';
 import {
     BrowserRouter as Router,
     Switch,
@@ -10,62 +10,71 @@ import './css/mdb.min.css';
 import './css/admin.css';
 import './css/scroll.css';
 import '../../bootstrap/css/bootstrap.min.css';
-import SystemFeedbackService from '../../services/SystemFeedbackService';
+import TeacherService from '../../services/TeacherService';
 
 import Select from 'react-select';
 
-class SystemFeedback extends Component {
+export default class AdminTeacherFeedback extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
+
         this.state = {
-            id: 0,
-            name: "",
-            selectedOption: null,
-            district: "",
-            fullName: "",
+            id: this.props.match.params.id,
+            redirect: null,
+            userReady: false,
+            currentUser: {},
+            teacherEntity: {},
+            jwtToken: "",
             email: "",
+            fullName: "",
+            errors: {},
+            feedbackEntity : {},
             message: "",
-            updateName: "",
-            updateEmail: "",
-            updateMessage: "",
-            showHide : false,
-            editShowHide: false,
-            categories: [],
             feedbacks: [],
-            options: [],
-            categoryEntity: {},
-            feedbackEntity: {},
-            categorySelectEditName: ""
-        }
+            showHide : false,
+            feedbackFullName : "",
+            feedbackEmail : "",
+            feedbackPluses : "",
+            feedbackMinuses : "",
+            feedbackReply : "",
+            feedbackMark: "",
+            updateFullName : "",
+            updateEmail : "",
+            updatePluses : "",
+            updateMinuses : "",
+            updateReply : "",
+            updateMark: "",
+            updateEnabled: false
+        };
 
-        this.handleNameChange = this.handleNameChange.bind(this);
-        this.handleUpdateNameChange = this.handleUpdateNameChange.bind(this);
+        this.handleChangeEmail = this.handleChangeEmail.bind(this);
+        this.handleChangeFullName = this.handleChangeFullName.bind(this);
+        this.handlePlusesChange = this.handlePlusesChange.bind(this);
+        this.handleMinusesChange = this.handleMinusesChange.bind(this);
+        this.handleReplyChange = this.handleReplyChange.bind(this);
+        this.handleMarkChange = this.handleMarkChange.bind(this);
         // this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleUpdateSubmit = this.handleUpdateSubmit.bind(this);
+
     }
 
-    componentDidMount(){
-        SystemFeedbackService.getSystemFeedbacks().then((res) => {
-            this.setState({ feedbacks: res.data});
-        });
-        
-        SystemFeedbackService.getSystemFeedbackCategories().then((res) => {
-            this.setState({ categories: res.data});
-
-            const options = this.state.categories.map(d => ({
-                "value" : d.id,
-                "label" : d.name
-              }));
-              this.setState({ options: options});
-        });
+    handleChangeFullName = event =>{
+        this.setState({updateFullName: event.target.value});
     }
-
-    handleNameChange = event =>{
-        this.setState({district: event.target.value});
+    handleChangeEmail = event =>{
+        this.setState({updateEmail: event.target.value});
     }
-    handleUpdateNameChange = event =>{
-        this.setState({updateName: event.target.value});
+    handlePlusesChange = event =>{
+        this.setState({updatePluses: event.target.value});
+    }
+    handleMinusesChange = event =>{
+        this.setState({updateMinuses: event.target.value});
+    }
+    handleReplyChange = event =>{
+        this.setState({updateReply: event.target.value});
+    }
+    handleMarkChange = event =>{
+        this.setState({updateMark: event.target.value});
     }
 
     handleModalShowHide() {
@@ -73,47 +82,91 @@ class SystemFeedback extends Component {
     }
 
     handleEditModalShow(id) {
-        SystemFeedbackService.getSystemFeedbackId(id).then( res => {
+        TeacherService.getTeacherFeedbackById(id).then( res => {
             this.setState({feedbackEntity: res.data});
-            this.setState({updateName: this.state.feedbackEntity.fullName, updateEmail: this.state.feedbackEntity.email, updateMessage: this.state.feedbackEntity.message });
-            this.setState({categorySelectEditName: this.state.feedbackEntity.category.name});
+            this.setState({
+                updateFullName: this.state.feedbackEntity.fullName, 
+                updateEmail: this.state.feedbackEntity.email, 
+                updatePluses: this.state.feedbackEntity.pluses,
+                updateMinuses: this.state.feedbackEntity.minuses,
+                updateReply: this.state.feedbackEntity.reply,
+                updateMark: this.state.feedbackEntity.mark,
+                updateEnabled: this.state.feedbackEntity.enabled
+            });
+            // this.setState({categorySelectEditName: this.state.feedbackEntity.category.name});
         });
-        this.setState({ editShowHide: !this.state.editShowHide })
+        this.setState({ editShowHide: !this.state.editShowHide });
+        //console.log('teacher => ' + JSON.stringify(this.state.teacherEntity));
+        console.log('teacher => ' + JSON.stringify(this.state.feedbackEntity));
+        
     }
     handleEditModalHide() {
-        this.setState({ editShowHide: !this.state.editShowHide })
+        this.setState({ editShowHide: !this.state.editShowHide });
     }
 
-    handleChange(e){
-        SystemFeedbackService.getSystemFeedbackCategoryById(e.value).then( res => {
-            this.setState({categoryEntity: res.data});
+    componentDidMount(){
+        TeacherService.getTeacherFeedbacks("all").then((res) => {
+            this.setState({ feedbacks: res.data});
         });
-        this.setState({ id: e.value, name: e.label})
+        
+        // SystemFeedbackService.getSystemFeedbackCategories().then((res) => {
+        //     this.setState({ categories: res.data});
+
+        //     const options = this.state.categories.map(d => ({
+        //         "value" : d.id,
+        //         "label" : d.name
+        //       }));
+        //       this.setState({ options: options});
+        // });
     }
-
-    // handleSubmit = (e) => {
-    //     e.preventDefault();
-    //     let districtBody = {district: this.state.district, city: this.state.cityEntity};
-
-    //     console.log('city => ' + JSON.stringify(districtBody));
-
-    //     CityService.createDistrict(districtBody).then(res =>{
-    //         window.location.replace("/admin/s-feedback");
-    //     });
-    // }
 
     handleUpdateSubmit = (e) => {
         e.preventDefault();
-        let feedbackBody = {fullName: this.state.updateName, email: this.state.updateEmail, message: this.state.message};
-        // console.log('city => ' + JSON.stringify(cityBody));
 
-        SystemFeedbackService.updateSystemFeedback(feedbackBody, this.state.feedbackEntity.id).then(res =>{
-            window.location.replace("/admin/s-feedback");
+        let feedbackBody = {
+            fullName: this.state.updateFullName, 
+            reply: this.state.updateReply,
+            minuses: this.state.updateMinuses,
+            pluses: this.state.updatePluses,
+            mark: this.state.updateMark
+        };
+
+        TeacherService.updateTeacherFeedback(this.state.feedbackEntity.id, feedbackBody).then(res => {
+            TeacherService.getTeacherFeedbacks("all").then((res) => {
+                this.setState({ feedbacks: res.data});
+                this.setState({ editShowHide: !this.state.editShowHide });
+            })
+        }    
+        );
+
+        
+    }
+
+    makeEnabled = (e) => {
+        e.preventDefault();
+        let enabledBody = {enabled: true};
+
+        TeacherService.updateEnabled(this.state.feedbackEntity.id, enabledBody).then(res => {
+            this.setState({updateEnabled: true});
+            TeacherService.getTeacherFeedbacks("all").then((res) => {
+                this.setState({ feedbacks: res.data});
+            })
+            // window.location.replace("/admin/teacher-feedback");
+        });
+    }
+    makeDisabled = (e) => {
+        e.preventDefault();
+        let enabledBody = {enabled: false};
+        TeacherService.updateEnabled(this.state.feedbackEntity.id, enabledBody).then(res => {
+            this.setState({updateEnabled: false});
+            TeacherService.getTeacherFeedbacks("all").then((res) => {
+                this.setState({ feedbacks: res.data});
+            })
         });
     }
 
-    render() {
 
+    render() {
         return (
             <div>
                 <head>
@@ -143,9 +196,9 @@ class SystemFeedback extends Component {
                                 <Link to="/admin/users" className="list-group-item list-group-item-action py-2 ripple"><i className="fas fa-users fa-fw me-3"></i><span>Users</span></Link>
                                 <Link to="/admin/cities" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-city me-3"></i><span>Cities</span></Link>
                                 <Link to="/admin/districts" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-building me-3"></i><span>Districts</span></Link>
-                                <Link to="/admin/s-feedback" className="list-group-item list-group-item-action py-2 ripple  active"><i class="fas fa-comment-dots me-3"></i><span>System feedback</span></Link>
+                                <Link to="/admin/s-feedback" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>System feedback</span></Link>
                                 <Link to="/admin/s-feedback-category" className="list-group-item list-group-item-action py-2 ripple"><i class="far fa-comment-dots me-3"></i><span>System feedback category</span></Link>
-                                <Link to="/admin/teacher-feedback" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>Teacher feedback</span></Link>
+                                <Link to="/admin/teacher-feedback" className="list-group-item list-group-item-action py-2 ripple active"><i class="fas fa-comment-dots me-3"></i><span>Teacher feedback</span></Link>
                                 <Link to="/admin/subject" className="list-group-item list-group-item-action py-2 ripple"><i className="fas fa-users fa-book me-3"></i><span>Subjects</span></Link>
                                 <Link to="/admin/subject-branches" className="list-group-item list-group-item-action py-2 ripple"><i className="fas fa-users fa-book me-3"></i><span>Subjects branches</span></Link>
                             </div>
@@ -216,8 +269,10 @@ class SystemFeedback extends Component {
                             <th>#</th>
                             <th>User full name</th>
                             <th>User email</th>
-                            <th>Message</th>
-                            <th>Category name</th>
+                            <th>Reply</th>
+                            <th>Mark</th>
+                            <th>Teacher name</th>
+                            <th>Enabled</th>
                             <th>Operations</th>
                             </tr>
                         </thead>
@@ -227,13 +282,14 @@ class SystemFeedback extends Component {
                                 <td>{feedback.id}</td>
                                 <td>{feedback.fullName}</td>
                                 <td>{feedback.email}</td>
-                                <td>{feedback.message}</td>
-                                <td>{feedback.category.name}</td>
+                                <td>{feedback.reply}</td>
+                                <td>{feedback.mark}</td>
+                                <td>{feedback.teacherFullName}</td>
+                                <td>{feedback.enabled.toString()}</td>
                                 <td>
                                 <Button className="btn btn-primary btn-sm" onClick={() => this.handleEditModalShow(feedback.id)}>
                                     <i class="far fa-edit"></i> Edit 
-                                </Button>
-                                    <a href="#" class="btn btn-danger btn-sm ml-3"><i class="fas fa-trash"></i> Delete</a>                                                        
+                                </Button>                                                        
                                 </td>
                                 </tr>
                             ))}
@@ -275,7 +331,7 @@ class SystemFeedback extends Component {
 
                 <Modal show={this.state.editShowHide}>
                     <Modal.Header closeButton onClick={() => this.handleEditModalHide()}>
-                    <Modal.Title>Edit city</Modal.Title>
+                    <Modal.Title>Изменить отзыв</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <form>
@@ -283,30 +339,76 @@ class SystemFeedback extends Component {
                                 <label>
                                     Name : 
                                 </label>
-                                <input type = "text" className = "form-control" value = { this.state.updateName } onChange = {this.handleUpdateNameChange}/>
+                                <input type = "text" className = "form-control" value = { this.state.updateFullName } onChange = {this.handleChangeFullName}/>
                             </div>
                             <div className = "form-group">
-                            <Select
+                                <label>
+                                    Email : 
+                                </label>
+                                <input type = "email" className = "form-control" value = { this.state.updateEmail }  readOnly="true" />
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Reply : 
+                                </label>
+                                <input type = "text" className = "form-control" value = { this.state.updateReply } onChange = {this.handleReplyChange}/>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Pluses : 
+                                </label>
+                                <input type = "text" className = "form-control" value = { this.state.updatePluses } onChange = {this.handlePlusesChange}/>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Minuses : 
+                                </label>
+                                <input type = "text" className = "form-control" value = { this.state.updateMinuses } onChange = {this.handleMinusesChange}/>
+                            </div>
+                            <div className = "form-group">
+                                <label>
+                                    Mark : 
+                                </label>
+                                <input type = "text" className = "form-control" value = { this.state.updateMark } onChange = {this.handleReplyChange}/>
+                            </div>
+                            <div className = "form-group">
+                                {this.state.updateEnabled == true && (
+                                    <Alert variant="primary">
+                                        Отзыв опубликован и доступен для публичного просмотра<br/>
+                                        <Button variant="danger" onClick={this.makeDisabled}>
+                                            Сделать недоступным
+                                        </Button>
+                                    </Alert>
+                                )}
+                                {this.state.updateEnabled != true && (
+                                    <Alert variant="danger">
+                                        Отзыв еще не опубликован и не доступен для публичного просмотра <br/>
+                                        <Button variant="primary" onClick={this.makeEnabled}>
+                                            Сделать доступным
+                                        </Button>
+                                    </Alert>
+                                )}
+                            </div>
+                            <div className = "form-group">
+                            {/* <Select
                                 value={this.state.options.filter(option => option.label === this.state.citySelectEditName)}
                                 onChange={this.handleChange.bind(this)}
                                 options={this.state.options}
-                            />
+                            /> */}
                             </div>
+                            <hr className="my-4"/>
                             <div className = "form-group">
-                                <button className = "btn btn-success" onClick={this.handleUpdateSubmit}>Edit city</button>
+                                <button className = "btn btn-success" onClick={this.handleUpdateSubmit}>Сохранить изменения</button>
                             </div>
                         </form>
                     </Modal.Body>
                     <Modal.Footer>
                     <Button variant="secondary" onClick={() => this.handleEditModalHide()}>
-                        Close
+                        Закрыть
                     </Button>
                     </Modal.Footer>
                 </Modal>
             </div>
-            
-        );
+        )
     }
 }
-
-export default SystemFeedback;

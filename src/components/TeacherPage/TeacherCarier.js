@@ -259,7 +259,7 @@ export default class TeacherCarier extends Component {
                                 <Link to="/teacher" class="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-tachometer-alt fa-fw me-3"></i><span>Основные данные</span></Link>
                                 <Link to="/teacher/carier" className="list-group-item list-group-item-action py-2 ripple active"><i class="fas fa-newspaper fa-fw me-3"></i><span>Карьера</span></Link>
                                 <Link to="/teacher/subjects" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-chart-line fa-fw me-3"></i><span>Предметная область</span></Link>
-                                <Link to="/teacher/feedbacks" className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>Отзывы обо мне</span></Link>
+                                <Link to={"/teacher/" + this.state.teacherEntity.id + "/feedbacks"} className="list-group-item list-group-item-action py-2 ripple"><i class="fas fa-comment-dots me-3"></i><span>Отзывы обо мне</span></Link>
                             </div>
                         </div>
                     </nav>
