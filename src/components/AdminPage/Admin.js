@@ -108,7 +108,7 @@ class Admin extends Component {
                             } 
                             id="basic-nav-dropdown">
                             
-                            <NavDropdown.Item href="#action/3.1">My account</NavDropdown.Item>
+                            <NavDropdown.Item href="#action/3.1">My accounts</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Settings</NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="#action/3.4">Logout</NavDropdown.Item>
